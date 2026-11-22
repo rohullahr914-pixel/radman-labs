@@ -40,6 +40,29 @@ export default function About() {
           From a first idea to a working application, Radman Labs approaches
           software with care, curiosity, and a focus on everyday usefulness.
         </p>
+        <section>
+          <h2>Engineering with intention</h2>
+          <p>
+            We start with a real need, build a focused solution, and improve it
+            through use. Clear interfaces, dependable foundations and
+            maintainable software guide the work.
+          </p>
+        </section>
+        <section>
+          <h2>Software and AI</h2>
+          <p>
+            Our focus spans practical applications, digital products and
+            intelligent tools. We explore automation where it can simplify
+            time-consuming work and keep the experience approachable.
+          </p>
+        </section>
+        <section>
+          <h2>From idea to everyday use</h2>
+          <p>
+            Understand the problem. Build and test the core experience. Release
+            thoughtfully. Listen, refine and keep improving.
+          </p>
+        </section>
         <Explore />
       </div>
     </div>

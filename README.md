@@ -1,12 +1,22 @@
-# Radman Labs
+# Radman Labs 2.0 2.0
 
 Next.js App Router, TypeScript, Tailwind CSS, shadcn-style accessible Button, Motion, Lucide, Supabase Auth/Postgres/Storage, and Vercel. Actual source code; no passwords, service-role keys, fake APKs, or fabricated screenshots.
 
+## Upgrade an existing installation
+
+Read [UPGRADE-2.0.md](UPGRADE-2.0.md) before deploying. Apply only migration 004 to an already bootstrapped database. [AUTH-DIAGNOSTICS.md](AUTH-DIAGNOSTICS.md) records the login investigation, code corrections and remaining production checks.
+
+## Upgrade the existing site
+
+Read [UPGRADE-2.0.md](UPGRADE-2.0.md) before deploying to the existing Vercel/Supabase projects. Apply only migration 004 to an already initialized database. Authentication findings and the secure recovery checklist are in [AUTH-DIAGNOSTICS.md](AUTH-DIAGNOSTICS.md).
+
 ## Run locally
 
-Requires Node.js 22. Run `npm ci`, copy `.env.example` to `.env.local`, then `npm run dev`. Open http://localhost:3000. Without Supabase settings, the public site displays a clearly marked HesabKo preview and fetches real GitHub releases; admin writes remain unavailable. With Supabase configured, only database products are displayed (no sample fallback on database errors).
+Requires Node.js 22. Run `npm ci`, copy `.env.example` to `.env.local`, then `npm run dev`. Open http://localhost:3000. Without Supabase settings, the public site displays an empty preparation state; admin writes remain unavailable. Set CATALOG_PREVIEW=true only for an explicit local development preview. Vercel production ignores that preview. With Supabase configured, only database products are displayed (no sample fallback on database errors).
 
-Commands: `npm run lint`, `npm run typecheck`, `npm test`, `npm run test:db`, `npm run build`, `npm run start`. Browser checks: `npx playwright install chromium`, then `npm run test:e2e` after building. Browser tests assume an unconfigured Supabase preview instance. Do not point them at production.
+Owner diagnostics: `npm run diagnose:auth` (read-only, requires project settings in the ignored local environment file).
+
+Commands: `npm run lint`, `npm run typecheck`, `npm test`, `npm run test:db`, `npm run build`, `npm run start`. Browser checks: `npx playwright install chromium`, then `npm run test:e2e` after building. Browser tests run isolated HTTP Supabase fixtures on port 54329 and the application on port 3107; they do not exercise a live Supabase service. Do not point them at production.
 
 ## Supabase bootstrap
 
@@ -28,7 +38,7 @@ The browser accepts JPEG/PNG/WebP originals up to 8 MB and 24 megapixels, resize
 
 Published products are read dynamically with an anonymous Supabase client and an explicit published filter, with RLS as the final boundary. Content changes appear on the next request without deployment. GitHub API metadata is cached for 5 minutes. Only stable, nondraft releases with uploaded APK assets from the selected repository are accepted. Admins can pin a tag and filename or use the latest stable release containing an APK. Up to the most recent 100 releases are listed.
 
-The product page displays the GitHub release tag, original asset filename, size, date, and release notes. The HesabKo release is tagged **v1.0.0** but its APK is named **HesabKo-v1.4-release.apk**; the application does not pretend these match. Only returned asset URLs become download buttons. On API failure, no APK URL is invented; a clearly labeled Releases-page fallback is shown. Direct download sources must use HTTPS; the owner is responsible for choosing a trustworthy file host. Download binaries are hosted externally, never in Postgres.
+The product page displays the GitHub release tag, original asset filename, size, date, and release notes. The original HesabKo asset **HesabKo-v1.4-release.apk** is no longer present. The upgrade API check returned **HesabKo-v1.4-release.9.apk** under **v1.0.0**; select the available file in the editor. The application does not equate either filename or release tag with the APK internal version. Only returned asset URLs become download buttons. On API failure, no APK URL is invented; a clearly labeled Releases-page fallback is shown. Direct download sources must use HTTPS; the owner is responsible for choosing a trustworthy file host. Download binaries are hosted externally, never in Postgres.
 
 ### Owner invitation and password setup
 
@@ -70,5 +80,3 @@ See `VERIFICATION.md` for checks actually executed in this workspace. No success
 - Confirm mobile layout, keyboard use, email callbacks, and rate limiting on the deployed domain.
 
 Design and product copy use only the supplied founder identity and release information. No employees, partnerships, funding, or awards are claimed.
-
-

@@ -5,6 +5,7 @@ import { Button } from "./ui/button";
 export function LoginForm() {
   const [state, action, pending] = useActionState(login, { error: "" });
   const [sent, setSent] = useState(false);
+  const [resetError, setResetError] = useState("");
   return (
     <>
       <form action={action} className="stack">
@@ -43,12 +44,24 @@ export function LoginForm() {
         disabled={sent}
         onClick={async () => {
           setSent(true);
-          await requestReset();
+          try {
+            const result = await requestReset();
+            setResetError(result.error);
+            if (result.error) setSent(false);
+          } catch {
+            setResetError("Recovery request failed. Please try again.");
+            setSent(false);
+          }
         }}
       >
         Set or reset your password
       </Button>
-      {sent && (
+      {resetError && (
+        <p className="error-text" role="alert">
+          {resetError}
+        </p>
+      )}
+      {sent && !resetError && (
         <p className="success-text" role="status">
           If the account is configured, a secure link will arrive by email.
           Please wait before requesting another.

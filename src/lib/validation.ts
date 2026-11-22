@@ -26,6 +26,8 @@ export const productSchema = z
     cover_url: httpsUrl,
     screenshots: z.array(httpsUrl).max(12),
     features: z.array(text(300).min(1)).max(40),
+    features_confirmed: z.boolean().default(false),
+    release_notes: text(15000).default(""),
     download_provider: z.enum(["github", "direct"]),
     download_url: httpsUrl,
     github_repository: text(200),

@@ -9,11 +9,7 @@ export default function Contact() {
     <div className="wrap">
       <div className="page-head">
         <div className="eyebrow">Open a conversation</div>
-        <h1>
-          Let’s build
-          <br />
-          <em>something useful.</em>
-        </h1>
+        <h1>Let’s build something useful.</h1>
         <p>
           Questions about a product, feedback, or an idea? Get in touch
           directly.

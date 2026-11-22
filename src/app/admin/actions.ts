@@ -41,7 +41,12 @@ export async function saveProduct(id: string, raw: unknown) {
           .select("id")
           .single()
       : await db.from("products").insert(data).select("id").single();
-    if (result.error) throw new Error(result.error.message);
+    if (result.error)
+      throw new Error(
+        ["PGRST204", "42703"].includes(result.error.code)
+          ? "Database upgrade required: apply supabase/migrations/202611210004_marketplace.sql in the existing Supabase project before saving."
+          : result.error.message,
+      );
     revalidatePath("/", "layout");
     return { ok: true, id: result.data.id };
   } catch (e) {

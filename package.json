@@ -1,6 +1,6 @@
 {
   "name": "radman-labs",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -11,7 +11,8 @@
     "test": "tsx --test tests/*.test.ts",
     "test:e2e": "playwright test",
     "test:db": "node tests/sql-policy.mjs",
-    "format": "prettier --write src tests *.ts *.mjs *.json"
+    "format": "prettier --write src tests *.ts *.mjs *.json",
+    "diagnose:auth": "node --env-file-if-exists=.env.local scripts/diagnose-auth.mjs"
   },
   "dependencies": {
     "@radix-ui/react-slot": "1.2.3",

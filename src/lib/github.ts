@@ -38,7 +38,15 @@ export async function releases(repo: string): Promise<Release[]> {
           ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` }
           : {}),
       },
-      next: { revalidate: 300 },
+      next: {
+        revalidate: Math.max(
+          30,
+          Math.min(
+            3600,
+            Number(process.env.GITHUB_RELEASE_CACHE_SECONDS) || 300,
+          ),
+        ),
+      },
       signal: AbortSignal.timeout(10000),
     },
   );

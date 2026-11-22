@@ -1,6 +1,7 @@
 "use server";
 import { configured, sessionClient } from "@/lib/supabase";
 import { redirect } from "next/navigation";
+import { authMessage } from "@/lib/auth-errors";
 import { z } from "zod";
 export async function login(_state: { error: string }, form: FormData) {
   if (!configured())
@@ -19,26 +20,57 @@ export async function login(_state: { error: string }, form: FormData) {
   )
     return { error: "Unable to sign in with those credentials." };
   const db = await sessionClient();
-  const { error } = await db.auth.signInWithPassword({ email, password });
+  let error;
+  try {
+    ({ error } = await db.auth.signInWithPassword({ email, password }));
+  } catch {
+    return { error: authMessage() };
+  }
+  if (error)
+    console.error("Owner authentication failed", {
+      code: error.code,
+      status: error.status,
+    });
   if (error)
     return {
-      error: "Unable to sign in. Check your credentials or try again later.",
+      error: authMessage(error.code, error.status),
     };
-  const { data } = await db.from("admin_profiles").select("id").single();
+  const { data, error: profileError } = await db
+    .from("admin_profiles")
+    .select("id")
+    .eq("role", "admin")
+    .single();
   if (!data) {
     await db.auth.signOut();
-    return { error: "Administrator access has not been provisioned." };
+    return {
+      error:
+        profileError?.code === "42P01"
+          ? "Database setup is incomplete. Apply the Supabase migrations, then provision the owner."
+          : "Sign-in succeeded, but owner authorization is missing. Run supabase/bootstrap-admin.sql for the invited owner account.",
+    };
   }
   redirect("/admin");
 }
 export async function requestReset() {
-  if (!configured()) return;
+  if (!configured())
+    return { error: "Supabase is not configured. Connect the project first." };
   const db = await sessionClient();
   const site = process.env.NEXT_PUBLIC_SITE_URL;
-  if (!site) return;
-  await db.auth.resetPasswordForEmail("rohullahr914@gmail.com", {
-    redirectTo: `${site}/auth/confirm`,
-  });
+  if (!site)
+    return {
+      error: "The site origin is not configured. Set NEXT_PUBLIC_SITE_URL.",
+    };
+  try {
+    const { error } = await db.auth.resetPasswordForEmail(
+      "rohullahr914@gmail.com",
+      { redirectTo: `${site}/auth/confirm` },
+    );
+    return error
+      ? { error: authMessage(error.code, error.status) }
+      : { error: "" };
+  } catch {
+    return { error: authMessage() };
+  }
 }
 export async function setPassword(_state: { error: string }, form: FormData) {
   if (!configured()) return { error: "Supabase is not configured." };

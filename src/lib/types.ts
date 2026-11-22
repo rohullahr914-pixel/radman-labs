@@ -12,6 +12,8 @@ export type Product = {
   cover_url: string;
   screenshots: string[];
   features: string[];
+  features_confirmed: boolean;
+  release_notes: string;
   download_provider: "github" | "direct";
   download_url: string;
   github_repository: string;
@@ -37,15 +39,9 @@ export const initialProduct: Product = {
   icon_url: "",
   cover_url: "",
   screenshots: [],
-  features: [
-    "Inventory management",
-    "Purchase and selling prices",
-    "Sales tracking and profit calculations",
-    "Shop expenses",
-    "Customer debts",
-    "Low-stock reminders",
-    "Sales analysis",
-  ],
+  features: [],
+  features_confirmed: false,
+  release_notes: "",
   download_provider: "github",
   download_url: "",
   github_repository: "rohullahr914-pixel/HesabKo-Android",

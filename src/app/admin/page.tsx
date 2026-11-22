@@ -4,6 +4,9 @@ import { requireAdmin } from "@/lib/supabase";
 import { Product } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { signOut } from "./actions";
+import { ProductIcon } from "@/components/site";
+import { DeleteApp } from "@/components/delete-app";
+import { SaveToast } from "@/components/save-toast";
 export const dynamic = "force-dynamic";
 export default async function Admin() {
   let db;
@@ -19,6 +22,7 @@ export default async function Admin() {
   const items = (data || []) as Product[];
   return (
     <div className="wrap admin-shell">
+      <SaveToast />
       <div className="page-head section-heading">
         <div>
           <div className="eyebrow">Your studio</div>
@@ -52,15 +56,21 @@ export default async function Admin() {
       <div className="mt-8">
         {items.map((p) => (
           <div className="admin-row" key={p.id}>
-            <div>
-              <h3>{p.name}</h3>
-              <p className="text-sm">
-                {p.status} · {p.platform}
-              </p>
+            <div className="admin-row-meta">
+              <ProductIcon product={p} />
+              <div>
+                <h3>{p.name}</h3>
+                <p className="text-sm">
+                  {p.status} · {p.platform} · {p.version || "No version"}
+                </p>
+              </div>
             </div>
-            <Button variant="outline" asChild>
-              <Link href={`/admin/products/${p.id}`}>Edit application</Link>
-            </Button>
+            <div className="admin-row-actions">
+              <Button variant="outline" asChild>
+                <Link href={`/admin/products/${p.id}`}>Edit application</Link>
+              </Button>
+              <DeleteApp id={p.id} name={p.name} />
+            </div>
           </div>
         ))}
         {!items.length && !error && (

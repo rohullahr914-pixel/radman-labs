@@ -1,58 +1,39 @@
-import type { Metadata } from "next";
 import { products } from "@/lib/products";
-import { ProductCard, SetupNotice } from "@/components/site";
-export const metadata: Metadata = {
-  title: "Products",
-  description: "Explore applications by Radman Labs.",
+import { SetupNotice } from "@/components/site";
+import { Catalog } from "@/components/catalog";
+export const metadata = {
+  title: "Apps",
+  description:
+    "Find thoughtfully engineered applications. Browse by category, platform and pricing.",
 };
 export const dynamic = "force-dynamic";
-export default async function Catalog({
+export default async function Products({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; category?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { q = "", category = "" } = await searchParams;
+  const params = await searchParams;
   const { items, mode } = await products();
-  const filtered = items.filter(
-    (p) =>
-      (!category || p.category === category) &&
-      `${p.name} ${p.description}`.toLowerCase().includes(q.toLowerCase()),
-  );
+  const value = (key: string) =>
+    typeof params[key] === "string" ? (params[key] as string) : "";
   return (
-    <div className="wrap">
+    <div className="wrap catalog-page">
       <div className="page-head">
-        <div className="eyebrow">The product collection</div>
-        <h1>Software with purpose.</h1>
-        <p>Discover practical applications, thoughtfully engineered.</p>
+        <div className="eyebrow">THE RADMAN LABS COLLECTION</div>
+        <h1>Find something useful.</h1>
+        <p>Practical apps. Clear purpose. Software that fits your day.</p>
       </div>
       <SetupNotice mode={mode} />
-      <form className="filters">
-        <input
-          name="q"
-          aria-label="Search applications"
-          placeholder="Search applications…"
-          defaultValue={q}
-        />
-        <select name="category" aria-label="Category" defaultValue={category}>
-          <option value="">All categories</option>
-          {Array.from(new Set([...items.map((p) => p.category), category]))
-            .filter(Boolean)
-            .map((c) => (
-              <option key={c}>{c}</option>
-            ))}
-        </select>
-        <button className="rounded-lg bg-emerald-400 px-5 py-2 text-slate-950 font-semibold">
-          Search
-        </button>
-      </form>
-      <div className="product-grid">
-        {filtered.map((p) => (
-          <ProductCard key={p.slug} product={p} />
-        ))}
-      </div>
-      {!filtered.length && (
-        <p className="panel">No applications match your search.</p>
-      )}
+      <Catalog
+        items={items}
+        initial={{
+          q: value("q"),
+          category: value("category"),
+          platform: value("platform"),
+          pricing: value("pricing"),
+          sort: value("sort") || "updated",
+        }}
+      />
     </div>
   );
 }

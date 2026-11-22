@@ -1,159 +1,236 @@
 import Link from "next/link";
-import { ArrowUpRight, Smartphone, Code2, Sparkles } from "lucide-react";
+import Image from "next/image";
+import { ArrowUpRight, Smartphone, Layers3 } from "lucide-react";
 import { products } from "@/lib/products";
-import {
-  ContactCards,
-  Explore,
-  ProductCard,
-  SetupNotice,
-} from "@/components/site";
+import { download } from "@/lib/download";
+import { ProductCard, ProductIcon, SetupNotice } from "@/components/site";
 import { Reveal } from "@/components/reveal";
 export const dynamic = "force-dynamic";
 export default async function Home() {
   const { items, mode } = await products();
+  const featured = [...items]
+    .sort((a, b) => Number(b.slug === "hesabko") - Number(a.slug === "hesabko"))
+    .slice(0, 6);
+  const lead = featured[0];
+  const sources = await Promise.all(
+    featured.map(async (p) => [p.slug, await download(p)] as const),
+  );
+  const downloads = new Map(sources);
+  const categories = Array.from(new Set(items.map((p) => p.category)));
+  const updated = [...items]
+    .sort(
+      (a, b) =>
+        (Date.parse(b.updated_at) || 0) - (Date.parse(a.updated_at) || 0),
+    )
+    .slice(0, 4);
   return (
-    <>
-      <section className="hero wrap">
+    <div className="wrap marketplace-home">
+      <section className="market-hero">
         <Reveal>
           <div className="eyebrow">
-            <span className="dot" /> Independent software & AI studio
+            <span className="dot" />
+            Independent software. Everyday possibilities.
           </div>
           <h1>
-            Engineering ideas
+            Software built
             <br />
-            into <em>reality.</em>
+            for <em>real life.</em>
           </h1>
-          <p className="hero-copy">
-            Building intelligent software, practical applications, and digital
-            products that solve real-world problems.
+          <p>
+            Discover powerful applications, intelligent tools, and thoughtfully
+            engineered software from Radman Labs.
           </p>
           <div className="actions">
-            <Explore />
-            <Link className="text-link" href="/about">
-              Meet Radman Labs <ArrowUpRight size={16} />
+            <Link className="primary-link" href="/products">
+              Explore Apps <ArrowUpRight size={18} />
             </Link>
+            <Link className="secondary-link" href="/about">
+              About Radman Labs
+            </Link>
+          </div>
+          <div className="hero-footnote">
+            <Smartphone size={16} /> Useful by design <span>·</span> Engineering
+            Ideas Into Reality.
           </div>
         </Reveal>
-        <div className="hero-art" aria-hidden="true">
-          <div className="orbit" />
-          <svg viewBox="0 0 320 320">
-            <path
-              d="M76 246V74h114l67 69h-84l84 103h-76l-72-103h77l-34-35h-43v138Z"
-              fill="#10b98112"
-              stroke="currentColor"
-              strokeWidth="2"
-            />
-          </svg>
-          <span className="art-caption">RADMAN LABS / IDEAS IN MOTION</span>
-        </div>
-      </section>
-      <div className="discipline">
-        <div className="wrap">
-          THOUGHTFULLY ENGINEERED <span>Software</span>
-          <span>AI & automation</span>
-          <span>Everyday tools</span>
-        </div>
-      </div>
-      <section className="wrap section">
-        <div className="section-heading">
-          <div>
-            <div className="eyebrow">01 / Our products</div>
-            <h2>Built for the real world.</h2>
-          </div>
-          <Link className="text-link" href="/products">
-            All products <ArrowUpRight size={18} />
+        {lead ? (
+          <Link className="hero-product" href={`/products/${lead.slug}`}>
+            <div className="hero-product-art">
+              {lead.cover_url ? (
+                <Image
+                  src={lead.cover_url}
+                  alt={`${lead.name} featured cover`}
+                  fill
+                  priority
+                  sizes="(max-width: 800px) 90vw, 45vw"
+                />
+              ) : lead.screenshots[0] ? (
+                <Image
+                  src={lead.screenshots[0]}
+                  alt={`${lead.name} application screenshot`}
+                  fill
+                  priority
+                  sizes="45vw"
+                />
+              ) : (
+                <div className="honest-art">
+                  <ProductIcon product={lead} />
+                  <span>{lead.name}</span>
+                  <small>{lead.tagline}</small>
+                </div>
+              )}
+              <span className="editorial-label">IN THE SPOTLIGHT</span>
+            </div>
+            <div className="hero-product-caption">
+              <div>
+                <span className="card-category">
+                  {lead.category} · {lead.platform}
+                </span>
+                <h2>{lead.name}</h2>
+              </div>
+              <ArrowUpRight />
+            </div>
           </Link>
-        </div>
-        <SetupNotice mode={mode} />
-        <div className="product-grid">
-          {items.slice(0, 3).map((p) => (
-            <ProductCard key={p.slug} product={p} />
-          ))}
-          <div className="next-card">
-            <span className="eyebrow">THE NEXT CHAPTER</span>
-            <h3>
-              Good ideas
-              <br />
-              keep moving.
-            </h3>
+        ) : (
+          <div className="hero-empty">
+            <Layers3 size={48} />
+            <h2>Your next useful tool.</h2>
             <p>
-              We’re exploring what technology can make simpler, smarter, and
-              more useful.
+              Explore our software collection as new applications become
+              available.
             </p>
-            <Link href="/about">
-              Inside the studio <ArrowUpRight size={18} />
-            </Link>
+            <Link href="/products">Browse the catalog ↗</Link>
           </div>
-        </div>
+        )}
       </section>
-      <section className="wrap section">
+      <SetupNotice mode={mode} />
+      <section className="market-section">
         <div className="section-heading">
           <div>
-            <div className="eyebrow">02 / What we build</div>
-            <h2>Purpose before complexity.</h2>
+            <div className="eyebrow">CURATED BY RADMAN LABS</div>
+            <h2>Featured Apps</h2>
           </div>
-          <p>
-            Independent by design.
-            <br />
-            Practical by nature.
-          </p>
+          <Link href="/products">See all apps ↗</Link>
         </div>
-        <div className="three-grid">
-          <div className="service">
-            <Smartphone />
-            <h3>Practical applications</h3>
-            <p>Accessible tools designed around everyday needs.</p>
+        {featured.length ? (
+          <div className="collection-rail">
+            {featured.map((p) => (
+              <ProductCard
+                key={p.slug}
+                product={p}
+                downloadUrl={downloads.get(p.slug)?.url}
+              />
+            ))}
           </div>
-          <div className="service">
-            <Sparkles />
-            <h3>Intelligent software</h3>
-            <p>Exploring AI that makes time-consuming tasks simpler.</p>
+        ) : (
+          <div className="empty-state">
+            <Layers3 />
+            <h3>Good software takes care.</h3>
+            <p>Our first published applications will appear here.</p>
           </div>
-          <div className="service">
-            <Code2 />
-            <h3>Digital products</h3>
-            <p>Reliable software, thoughtfully built from the first idea.</p>
+        )}
+      </section>
+      <section id="categories" className="market-section">
+        <div className="section-heading">
+          <div>
+            <div className="eyebrow">FIND YOUR FOCUS</div>
+            <h2>Explore by category</h2>
           </div>
         </div>
-        <div className="categories">
-          {["Business Software", "AI & Automation", "Utilities"].map((c) => (
+        <div className="category-grid">
+          {categories.map((c) => (
             <Link key={c} href={`/products?category=${encodeURIComponent(c)}`}>
-              {c} ↗
+              <Layers3 />
+              <strong>{c}</strong>
+              <span>
+                {items.filter((p) => p.category === c).length} apps{" "}
+                <ArrowUpRight size={16} />
+              </span>
             </Link>
           ))}
         </div>
+        {!categories.length && (
+          <p className="empty-inline">
+            Categories appear when applications are published.
+          </p>
+        )}
       </section>
-      <section className="wrap founder section">
+      {categories
+        .filter(
+          (c) =>
+            items.length > 3 &&
+            /business|productivity|\bai\b|automation/i.test(c),
+        )
+        .map((c) => (
+          <section className="market-section" key={c}>
+            <div className="section-heading">
+              <h2>{c}</h2>
+              <Link href={`/products?category=${encodeURIComponent(c)}`}>
+                Explore category ↗
+              </Link>
+            </div>
+            <div className="market-grid">
+              {items
+                .filter((p) => p.category === c)
+                .slice(0, 4)
+                .map((p) => (
+                  <ProductCard key={p.slug} product={p} />
+                ))}
+            </div>
+          </section>
+        ))}
+      <section className="market-section">
+        <div className="section-heading">
+          <h2>Recently Updated</h2>
+          <Link href="/products?sort=updated">All Applications ↗</Link>
+        </div>
+        <div className="recent-list">
+          {updated.map((p) => (
+            <Link
+              className="recent-app"
+              href={`/products/${p.slug}`}
+              key={p.slug}
+            >
+              <ProductIcon product={p} />
+              <div>
+                <h3>{p.name}</h3>
+                <p>
+                  {p.platform} · {p.pricing}
+                  {p.updated_at
+                    ? " · Updated " +
+                      new Date(p.updated_at).toISOString().slice(0, 10)
+                    : ""}
+                </p>
+              </div>
+              <ArrowUpRight />
+            </Link>
+          ))}
+        </div>
+        {!updated.length && (
+          <p className="empty-inline">
+            New releases and updates will be listed here.
+          </p>
+        )}
+      </section>
+      <section className="studio-banner">
         <div>
-          <div className="eyebrow">03 / The person behind the work</div>
+          <div className="eyebrow">SMALL STUDIO. THOUGHTFUL SOFTWARE.</div>
           <h2>
-            Small studio.
+            Powerful technology,
             <br />
-            Personal commitment.
+            made approachable.
           </h2>
         </div>
         <div>
           <p>
-            Radman Labs is an independent software and AI product studio founded
-            by Rohullah Radman. We believe powerful technology should feel
-            approachable.
+            Making powerful technology accessible through thoughtfully
+            engineered software.
           </p>
-          <h3>Rohullah Radman</h3>
-          <p lang="fa" dir="rtl" className="persian">
-            روح‌الله رادمان
-          </p>
-          <span className="muted">Founder & Software Engineer</span>
+          <strong>Rohullah Radman — Founder & Software Engineer</strong>
+          <p lang="fa">روح‌الله رادمان</p>
+          <Link href="/about">Meet the studio ↗</Link>
         </div>
       </section>
-      <section className="wrap section">
-        <div className="eyebrow">04 / Let’s connect</div>
-        <h2>
-          Every useful product
-          <br />
-          starts with a conversation.
-        </h2>
-        <ContactCards />
-      </section>
-    </>
+    </div>
   );
 }

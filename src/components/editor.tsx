@@ -7,23 +7,31 @@ import { Product, initialProduct } from "@/lib/types";
 import { saveProduct, deleteProduct, listGithub } from "@/app/admin/actions";
 import { Button } from "./ui/button";
 import { compressImage } from "@/lib/image-client";
+import { DirectSource } from "./direct-source";
 type ReleaseList = Awaited<ReturnType<typeof listGithub>>;
 export function Editor({ product }: { product?: Product }) {
   const [p, setP] = useState<Product>(
-    product || {
-      ...initialProduct,
-      id: "",
-      name: "",
-      slug: "",
-      tagline: "",
-      description: "",
-      features: [],
-      version: "",
-      github_repository: "",
-      github_tag: "",
-      github_asset: "",
-      status: "draft",
-    },
+    product
+      ? {
+          ...initialProduct,
+          ...product,
+          release_notes: product.release_notes || "",
+          features_confirmed: product.features_confirmed || false,
+        }
+      : {
+          ...initialProduct,
+          id: "",
+          name: "",
+          slug: "",
+          tagline: "",
+          description: "",
+          features: [],
+          version: "",
+          github_repository: "",
+          github_tag: "",
+          github_asset: "",
+          status: "draft",
+        },
   );
   const [busy, setBusy] = useState(false),
     [message, setMessage] = useState(""),
@@ -32,7 +40,7 @@ export function Editor({ product }: { product?: Product }) {
   const set = (key: keyof Product, value: unknown) =>
     setP((old) => ({ ...old, [key]: value }));
   async function upload(
-    files: FileList | null,
+    files: FileList | File[] | null,
     key: "icon_url" | "cover_url" | "screenshots",
   ) {
     if (!files?.length) return;
@@ -72,7 +80,7 @@ export function Editor({ product }: { product?: Product }) {
         features: p.features.map((f) => f.trim()).filter(Boolean),
       });
       if (result.ok) {
-        router.push("/admin");
+        router.push("/admin?saved=1");
         router.refresh();
       } else setMessage(result.error || "Unable to save.");
     } catch {
@@ -93,7 +101,8 @@ export function Editor({ product }: { product?: Product }) {
       | "download_url"
       | "github_repository"
       | "installation"
-      | "description",
+      | "description"
+      | "release_notes",
     label: string,
     multiline = false,
   ) => (
@@ -144,14 +153,43 @@ export function Editor({ product }: { product?: Product }) {
           onChange={(e) => set("features", e.target.value.split("\n"))}
         />
       </label>
+      <label className="full flex gap-3 items-center">
+        <input
+          type="checkbox"
+          checked={p.features_confirmed || false}
+          onChange={(e) => set("features_confirmed", e.target.checked)}
+        />
+        I have verified these features in the released application.
+      </label>
+      <div className="full">
+        {field("release_notes", "What’s new / release notes", true)}
+      </div>
       <section className="full panel stack">
         <h3>Images</h3>
+        <p>
+          Drop images into a field below, or choose files. Use the arrow buttons
+          to reorder screenshots.
+        </p>
         <p>
           JPEG, PNG or WebP · up to 8 MB each. Images are compressed on upload.
           Screenshots: up to 12.
         </p>
         {(["icon_url", "cover_url", "screenshots"] as const).map((key) => (
-          <div className="stack" key={key}>
+          <div
+            className="stack drop-zone"
+            key={key}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              e.preventDefault();
+              if (!busy)
+                void upload(
+                  key === "screenshots"
+                    ? e.dataTransfer.files
+                    : Array.from(e.dataTransfer.files).slice(0, 1),
+                  key,
+                );
+            }}
+          >
             <label>
               {key === "icon_url"
                 ? "App icon"
@@ -169,7 +207,7 @@ export function Editor({ product }: { product?: Product }) {
             <div className="preview-images">
               {(key === "screenshots" ? p.screenshots : [p[key]])
                 .filter(Boolean)
-                .map((url) => (
+                .map((url, index) => (
                   <div key={url}>
                     <Image
                       src={url}
@@ -177,6 +215,40 @@ export function Editor({ product }: { product?: Product }) {
                       height={95}
                       alt="Uploaded image preview"
                     />
+                    {key === "screenshots" && (
+                      <div className="reorder-buttons">
+                        <button
+                          type="button"
+                          disabled={busy || index === 0}
+                          aria-label={`Move screenshot ${index + 1} earlier`}
+                          onClick={() => {
+                            const next = [...p.screenshots];
+                            [next[index - 1], next[index]] = [
+                              next[index],
+                              next[index - 1],
+                            ];
+                            set("screenshots", next);
+                          }}
+                        >
+                          ←
+                        </button>
+                        <button
+                          type="button"
+                          disabled={busy || index === p.screenshots.length - 1}
+                          aria-label={`Move screenshot ${index + 1} later`}
+                          onClick={() => {
+                            const next = [...p.screenshots];
+                            [next[index + 1], next[index]] = [
+                              next[index],
+                              next[index + 1],
+                            ];
+                            set("screenshots", next);
+                          }}
+                        >
+                          →
+                        </button>
+                      </div>
+                    )}
                     <button
                       type="button"
                       disabled={busy}
@@ -210,7 +282,10 @@ export function Editor({ product }: { product?: Product }) {
           </select>
         </label>
         {p.download_provider === "direct" ? (
-          field("download_url", "HTTPS download URL")
+          <>
+            {field("download_url", "HTTPS download URL")}
+            <DirectSource url={p.download_url} />
+          </>
         ) : (
           <>
             {field(

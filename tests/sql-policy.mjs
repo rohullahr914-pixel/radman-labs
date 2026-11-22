@@ -55,6 +55,39 @@ try {
     (await db.query("select public.is_admin() as allowed")).rows[0].allowed,
     true,
   );
+  await db.exec(`
+    insert into public.products(name,slug,description,category,platform,status,release_notes,features_confirmed)
+      values('CRUD fixture','owner-crud-fixture','Test only','Business Software','Android','draft','Initial notes',false);
+    insert into public.product_releases(product_id,version,release_notes,download_url)
+      select id,'test-v1','Test notes','https://example.com/test.apk' from public.products where slug='owner-crud-fixture';
+    update public.products set release_notes='Updated notes',features_confirmed=true where slug='owner-crud-fixture';
+  `);
+  assert.equal(
+    (
+      await db.query(
+        "select release_notes,features_confirmed from public.products where slug='owner-crud-fixture'",
+      )
+    ).rows[0].release_notes,
+    "Updated notes",
+  );
+  assert.equal(
+    (
+      await db.query(
+        "select features_confirmed from public.products where slug='owner-crud-fixture'",
+      )
+    ).rows[0].features_confirmed,
+    true,
+  );
+  await db.exec("delete from public.products where slug='owner-crud-fixture';");
+  assert.equal(
+    (
+      await db.query(
+        "select * from public.product_releases where version='test-v1'",
+      )
+    ).rows.length,
+    0,
+    "Owner delete cascades releases",
+  );
   assert.equal(
     (
       await db.query(

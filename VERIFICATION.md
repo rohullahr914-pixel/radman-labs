@@ -1,30 +1,38 @@
-# Verification — 2026-11-21
+# Radman Labs 2.0 — verification
 
-Executed locally on Windows with Node.js 22.22.2 and npm 10.9.7. Supabase environment values were absent. These results verify the delivered source locally, not a deployed production service.
+Executed in the existing project on Windows, Node.js 22.22.2, npm 10.9.7. No production database changes or authenticated cloud tests were performed.
 
-| Check | Result |
+| Check | Actual result |
 | --- | --- |
-| `npm run lint` | Passed, no warnings/errors |
-| `npm run typecheck` | Passed |
-| `npm test` | 4/4 passed |
-| `npm run test:db` | All three migrations applied and policy assertions passed |
-| `npm run build` | Passed compilation, TypeScript and prerendering |
-| `npm run test:e2e` | 8/8 passed against the production build |
-| `npm audit --audit-level=moderate` | 0 reported vulnerabilities |
+| ESLint | Passed after correcting the reported React lint issues |
+| TypeScript | Passed |
+| Production build | Passed compilation, type checking and prerendering |
+| Unit tests | 7 passed |
+| SQL/RLS tests | All four migrations and assertions passed in PGlite |
+| Browser tests | 13 passed, 1 skipped (mobile-only navigation on desktop) |
+| Dependency audit | 0 reported vulnerabilities |
+| Auth diagnostics | Correctly reports missing local Supabase URL/key/site origin; cloud checks could not run |
 
-Browser checks used installed Google Chrome through `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`, with desktop and Pixel 7 emulation. They covered navigation, catalog search, product details, founder/contact links, horizontal overflow, unauthenticated admin redirects, rejected upload requests, sitemap, robots, both Open Graph image routes, and the custom 404. Homepage screenshots at 1440px and 393px were inspected visually. Mobile emulation is not a physical-device test. The GitHub API can take up to six seconds before the failure fallback appears.
+## Scope of the executed checks
 
-Database tests use disposable PGlite PostgreSQL with minimal stand-ins for Supabase's `auth` and `storage` schemas. They execute the actual migration SQL, bootstrap and RLS assertions. Verified: anonymous draft/write denial, normal-user write/admin-escalation denial, owner access/publishing, published catalog visibility, future-release exclusion, referenced-media deletion rejection and orphan deletion. They do **not** exercise Supabase's live Auth service, Storage HTTP service, hosted configuration or mail delivery.
+Browser checks used installed Google Chrome with desktop and Pixel 7 emulation against the production build. Isolated HTTP fixtures supplied one test product through the Supabase REST client path. Tests covered homepage/navigation/contact links, immediate search, combined category/platform/pricing filters, sorting and URL state, details, horizontal overflow, screenshot modal keyboard navigation/Escape/focus restoration, the mobile menu, unauthenticated redirects and rejected uploads, sitemap/robots/Open Graph images and custom 404. Fixture images are clearly test-only local logo files, never imported into the production catalog. These tests do not claim hosted Supabase or actual app screenshots were available.
 
-The live GitHub API returned the stable HesabKo release tag `v1.0.0` and uploaded asset `HesabKo-v1.4-release.apk`, with a size of 18,336,628 bytes. The application resolver selected its actual GitHub URL. An HTTP HEAD request to the asset returned 200 and the matching content length. A complete binary download, checksum, installation and feature/security review were not performed; no APK is bundled with this website.
+The desktop/mobile homepage was also rendered with the explicitly labeled local development preview and inspected visually after correcting card styling. The actual app's screenshots/icon were not fabricated.
 
-Dependency remediation upgraded Sharp to 0.35.5 and Zod to 4.6.7. Exact overrides pin available TypeScript ESLint and browser-mapping releases; the TypeScript ESTree-specific Minimatch override uses patched 11.0.1. Lint passed with these overrides. The audit result is a point-in-time advisory check, not a security certification.
+The SQL suite uses disposable PGlite PostgreSQL with minimal stand-ins for Supabase-owned Auth/Storage schemas. It applies the real migrations and tests anonymous/normal-user RLS denial, owner authorization, product creation/update/deletion and release cascade, new release-note/feature-confirmation persistence, publishing/public visibility, future-release exclusion, and protected versus orphan-media deletion. It does not test Storage HTTP uploads, Auth email/password/session services or hosted project settings.
 
-## Requires the owner's services before launch
+Unit checks cover repository/asset restrictions, GitHub failure behavior, product validation, combined catalog filters/sorting, safe authentication error messages, configuration alias support and secret-key rejection.
 
-- Apply migrations in an actual Supabase project; disable signups, configure Auth URLs/templates/rate limits and invite the specified owner; execute the admin bootstrap.
-- Test invitation, password setup/reset, session refresh/logout, owner CRUD, image compression/upload/deletion and published/draft behavior with a separate anonymous browser.
-- Review the HesabKo draft against the actual APK, add genuine icon/screenshots and publish it. No fictional artwork is substituted.
-- Configure the final site origin and public Supabase values, deploy to Vercel, and verify HTTPS, email delivery, redirects and mobile behavior on that domain.
+## Live observations
 
-The README contains the setup steps and a live verification checklist. No Supabase project, credentials, cloud database, GitHub repository or Vercel deployment was created or assumed.
+- Production `/admin/login` returned HTTP 200. No successful owner sign-in, password reset or admin write was attempted or claimed. See `AUTH-DIAGNOSTICS.md` for what the old error establishes and what remains unknown.
+- GitHub's live Releases API returned stable tag `v1.0.0` with asset **`HesabKo-v1.4-release.9.apk`**, size **18,336,628 bytes**. The actual application resolver selected that asset by its API-provided name and URL. The older expected filename **`HesabKo-v1.4-release.apk`** is absent; its direct URL returned **404**. No file URL was invented.
+- The currently available APK began downloading but did not finish within the network timeout. A HEAD attempt also timed out. Full file transfer, checksum, APK installation, internal-version inspection and feature/security review remain unverified.
+- The repository's source tree exposed only a README, with no genuine screenshot/icon sources to import.
+- Browser automation for inspecting any existing cloud dashboard session could not initialize because its runtime assets were unavailable.
+
+## Required before production sign-off
+
+Apply the additive migration 004 to the existing Supabase project. Validate production URL/key/provider/owner confirmation and authorization, invite or recover the owner securely, and test real login/logout/session refresh. Select the current APK in the owner editor, upload actual artwork, confirm features, and test create/edit/delete, media upload/cleanup, publish/unpublish and anonymous draft denial against that project. Confirm deployment and email callbacks on the final domain.
+
+The exact upgrade order and minimum setup are in `UPGRADE-2.0.md`; no destructive reset is required.
