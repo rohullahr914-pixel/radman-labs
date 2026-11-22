@@ -1,0 +1,4 @@
+-- Seeded as draft: owner must review the actual APK and images before publishing.
+insert into public.products(name,slug,tagline,description,category,platform,version,pricing,language,features,download_provider,github_repository,github_tag,github_asset,installation,status)
+values('HesabKo — حساب کو','hesabko','حساب آسان، کاروبار مطمئن','Offline accounting and inventory management for small shops and businesses in Afghanistan.','Business Software','Android','v1.0.0','Free','Dari / Persian',array['Inventory management','Purchase and selling prices','Sales tracking and profit calculations','Shop expenses','Customer debts','Low-stock reminders','Sales analysis'],'github','rohullahr914-pixel/HesabKo-Android','v1.0.0','HesabKo-v1.4-release.apk','Download the APK on your Android device. Open it and, if prompted, allow installation from your browser. Install the app, then turn this permission off. Only install files from a source you trust.','draft');
+

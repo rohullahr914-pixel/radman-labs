@@ -1,0 +1,47 @@
+import { Explore } from "@/components/site";
+export const metadata = {
+  title: "About",
+  description:
+    "Meet Rohullah Radman and the independent software studio Radman Labs.",
+};
+export default function About() {
+  return (
+    <div className="wrap">
+      <div className="page-head">
+        <div className="eyebrow">Inside the studio</div>
+        <h1>
+          Independent thinking.
+          <br />
+          <em>Useful technology.</em>
+        </h1>
+      </div>
+      <div className="content">
+        <p>
+          Radman Labs is an independent software and AI product studio. We build
+          intelligent software, practical applications, and digital products
+          that solve real-world problems.
+        </p>
+        <h2>Our mission</h2>
+        <p>
+          Making powerful technology accessible through thoughtfully engineered
+          software.
+        </p>
+        <h2>Meet the founder</h2>
+        <p>
+          <strong className="text-white">
+            Rohullah Radman — Founder & Software Engineer
+          </strong>
+          <br />
+          <span lang="fa" dir="rtl">
+            روح‌الله رادمان
+          </span>
+        </p>
+        <p>
+          From a first idea to a working application, Radman Labs approaches
+          software with care, curiosity, and a focus on everyday usefulness.
+        </p>
+        <Explore />
+      </div>
+    </div>
+  );
+}
