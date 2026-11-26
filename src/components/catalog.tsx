@@ -1,6 +1,6 @@
 "use client";
 import { useDeferredValue, useState } from "react";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal, LayoutGrid, List, X } from "lucide-react";
 import type { Product } from "@/lib/types";
 import { filterProducts, type Filters } from "@/lib/catalog";
 import { ProductCard } from "./site";
@@ -13,6 +13,7 @@ export function Catalog({
 }) {
   const [filters, setFilters] = useState(initial);
   const [limit, setLimit] = useState(12);
+  const [view, setView] = useState<"grid" | "list">("grid");
   const deferred = useDeferredValue(filters);
   const filtered = filterProducts(items, deferred);
   function set(key: keyof Filters, value: string) {
@@ -80,27 +81,69 @@ export function Catalog({
           </select>
         </div>
       </div>
-      <div className="results-line" role="status">
-        {filtered.length}{" "}
-        {filtered.length === 1 ? "application" : "applications"}
-        {filters.q && ` matching “${filters.q}”`}
-        <button
-          onClick={() => {
-            setFilters({
-              q: "",
-              category: "",
-              platform: "",
-              pricing: "",
-              sort: "updated",
-            });
-            setLimit(12);
-            window.history.replaceState(null, "", "/products");
-          }}
-        >
-          Clear filters
-        </button>
+      <div className="active-filters" aria-label="Selected filters">
+        {(["q", "category", "platform", "pricing"] as const)
+          .filter((key) => filters[key])
+          .map((key) => (
+            <button
+              key={key}
+              onClick={() => set(key, "")}
+              aria-label={`Remove ${key} filter`}
+            >
+              {key === "q" ? "Search: " : ""}
+              {filters[key]}
+              <X size={12} />
+            </button>
+          ))}
       </div>
-      <div className="market-grid" aria-busy={filters !== deferred}>
+      <div className="results-line" role="status">
+        <span>
+          {filtered.length}{" "}
+          {filtered.length === 1 ? "application" : "applications"}
+          {filters.q && ` matching “${filters.q}”`}
+        </span>
+        <div className="result-actions">
+          <div
+            className="view-switch"
+            role="group"
+            aria-label="Display applications"
+          >
+            <button
+              aria-label="Grid view"
+              aria-pressed={view === "grid"}
+              onClick={() => setView("grid")}
+            >
+              <LayoutGrid size={16} />
+            </button>
+            <button
+              aria-label="List view"
+              aria-pressed={view === "list"}
+              onClick={() => setView("list")}
+            >
+              <List size={16} />
+            </button>
+          </div>
+          <button
+            onClick={() => {
+              setFilters({
+                q: "",
+                category: "",
+                platform: "",
+                pricing: "",
+                sort: "updated",
+              });
+              setLimit(12);
+              window.history.replaceState(null, "", "/products");
+            }}
+          >
+            Clear filters
+          </button>
+        </div>
+      </div>
+      <div
+        className={`market-grid ${view === "list" ? "catalog-list" : ""}`}
+        aria-busy={filters !== deferred}
+      >
         {filtered.slice(0, limit).map((p) => (
           <ProductCard key={p.id || p.slug} product={p} />
         ))}
@@ -118,7 +161,31 @@ export function Catalog({
               ? "Try another search or clear the filters."
               : "Published applications will appear here as soon as they are available."}
           </p>
+          {items.length > 0 && (
+            <button
+              className="secondary-link"
+              onClick={() => {
+                setFilters({
+                  q: "",
+                  category: "",
+                  platform: "",
+                  pricing: "",
+                  sort: "updated",
+                });
+                setLimit(12);
+                window.history.replaceState(null, "", "/products");
+              }}
+            >
+              Browse all apps
+            </button>
+          )}
         </div>
+      )}
+      {filtered.length > 0 && (
+        <p className="catalog-progress">
+          Showing {Math.min(limit, filtered.length)} of {filtered.length}{" "}
+          applications
+        </p>
       )}
       {filtered.length > limit && (
         <button className="load-more" onClick={() => setLimit(limit + 12)}>

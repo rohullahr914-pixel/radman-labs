@@ -1,6 +1,6 @@
 # Radman Labs 2.0 — verification
 
-Executed in the existing project on Windows, Node.js 22.22.2, npm 10.9.7. No production database changes or authenticated cloud tests were performed.
+Refinement verified November 26, 2026. Executed in the existing project on Windows, Node.js 22.22.2, npm 10.9.7. No production database changes or authenticated cloud tests were performed.
 
 | Check | Actual result |
 | --- | --- |
@@ -9,13 +9,13 @@ Executed in the existing project on Windows, Node.js 22.22.2, npm 10.9.7. No pro
 | Production build | Passed compilation, type checking and prerendering |
 | Unit tests | 7 passed |
 | SQL/RLS tests | All four migrations and assertions passed in PGlite |
-| Browser tests | 13 passed, 1 skipped (mobile-only navigation on desktop) |
+| Browser tests | 15 passed, 1 skipped (mobile-only navigation on desktop) |
 | Dependency audit | 0 reported vulnerabilities |
 | Auth diagnostics | Correctly reports missing local Supabase URL/key/site origin; cloud checks could not run |
 
 ## Scope of the executed checks
 
-Browser checks used installed Google Chrome with desktop and Pixel 7 emulation against the production build. Isolated HTTP fixtures supplied one test product through the Supabase REST client path. Tests covered homepage/navigation/contact links, immediate search, combined category/platform/pricing filters, sorting and URL state, details, horizontal overflow, screenshot modal keyboard navigation/Escape/focus restoration, the mobile menu, unauthenticated redirects and rejected uploads, sitemap/robots/Open Graph images and custom 404. Fixture images are clearly test-only local logo files, never imported into the production catalog. These tests do not claim hosted Supabase or actual app screenshots were available.
+Browser checks used installed Google Chrome with desktop and Pixel 7 emulation against the production build. Isolated HTTP fixtures supplied one test product through the Supabase REST client path. Tests covered homepage/navigation/contact links, immediate search, combined category/platform/pricing filters, sorting and URL state, details, horizontal overflow, screenshot modal keyboard navigation/Escape/focus restoration, gallery thumbnail selection, keyboard search shortcuts, the mobile menu, unauthenticated redirects and rejected uploads, sitemap/robots/Open Graph images and custom 404. Fixture images are clearly test-only local logo files, never imported into the production catalog. These tests do not claim hosted Supabase or actual app screenshots were available.
 
 The desktop/mobile homepage was also rendered with the explicitly labeled local development preview and inspected visually after correcting card styling. The actual app's screenshots/icon were not fabricated.
 

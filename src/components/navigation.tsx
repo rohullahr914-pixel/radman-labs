@@ -1,15 +1,41 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Menu, Search, X } from "lucide-react";
 export function Navigation() {
   const [open, setOpen] = useState(false);
   const path = usePathname();
+  const search = useRef<HTMLInputElement>(null);
+  const toggle = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    function handle(event: KeyboardEvent) {
+      if (document.querySelector("dialog[open]")) return;
+      const target = event.target as HTMLElement;
+      const editing =
+        target.isContentEditable ||
+        ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName);
+      if (
+        (event.key === "k" && (event.ctrlKey || event.metaKey)) ||
+        (event.key === "/" && !editing)
+      ) {
+        event.preventDefault();
+        setOpen(true);
+        requestAnimationFrame(() => search.current?.focus());
+      }
+      if (event.key === "Escape" && open) {
+        setOpen(false);
+        toggle.current?.focus();
+      }
+    }
+    window.addEventListener("keydown", handle);
+    return () => window.removeEventListener("keydown", handle);
+  }, [open]);
   return (
     <>
       <button
         type="button"
+        ref={toggle}
         className="menu-toggle"
         aria-label={open ? "Close navigation" : "Open navigation"}
         aria-expanded={open}
@@ -44,11 +70,14 @@ export function Navigation() {
         >
           <Search size={17} />
           <input
+            ref={search}
             name="q"
             placeholder="Search apps"
             aria-label="Search all applications"
           />
-          <button aria-label="Submit search">↵</button>
+          <button aria-label="Submit search">
+            <kbd>/</kbd>
+          </button>
         </form>
       </div>
     </>

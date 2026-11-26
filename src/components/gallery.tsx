@@ -105,6 +105,24 @@ export function Gallery({ images, name }: { images: string[]; name: string }) {
             <ChevronRight />
           </button>
         </div>
+        {images.length > 1 && (
+          <div
+            className="gallery-thumbnails"
+            role="group"
+            aria-label="Choose screenshot"
+          >
+            {images.map((src, i) => (
+              <button
+                key={`${src}-${i}`}
+                aria-label={`Show screenshot ${i + 1}`}
+                aria-current={index === i}
+                onClick={() => setIndex(i)}
+              >
+                <Image src={src} alt="" width={35} height={42} />
+              </button>
+            ))}
+          </div>
+        )}
         <p className="gallery-hint">Swipe or use ← → · Escape to close</p>
       </dialog>
     </>

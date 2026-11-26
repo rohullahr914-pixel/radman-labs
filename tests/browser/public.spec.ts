@@ -53,9 +53,27 @@ test("gallery opens, supports arrows, closes with Escape and restores focus", as
   await expect(modal.getByText("2 / 2", { exact: true })).toBeVisible();
   await page.keyboard.press("ArrowLeft");
   await expect(modal.getByText("1 / 2", { exact: true })).toBeVisible();
+  await modal
+    .getByRole("button", { name: "Show screenshot 2", exact: true })
+    .click();
+  await expect(modal.getByText("2 / 2", { exact: true })).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(modal).not.toBeVisible();
   await expect(opener).toBeFocused();
+});
+test("keyboard search shortcut opens and focuses global search", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.waitForLoadState("networkidle");
+  await page.keyboard.press("/");
+  await expect(
+    page.getByRole("textbox", { name: "Search all applications" }),
+  ).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(
+    page.getByRole("button", { name: "Open navigation", includeHidden: true }),
+  ).toHaveAttribute("aria-expanded", "false");
 });
 test("filters combine instantly and preserve the URL", async ({ page }) => {
   await page.goto("/products");
@@ -87,7 +105,7 @@ test("mobile navigation is operable", async ({ page, isMobile }) => {
     .click();
   await expect(page).toHaveURL(/\/products$/);
   await expect(
-    page.getByRole("button", { name: "Open navigation" }),
+    page.getByRole("button", { name: "Open navigation", includeHidden: true }),
   ).toHaveAttribute("aria-expanded", "false");
 });
 test("admin is inaccessible without configuration/session", async ({

@@ -1,6 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowUpRight, Smartphone, Layers3 } from "lucide-react";
+import {
+  ArrowUpRight,
+  Smartphone,
+  Layers3,
+  Search,
+  Download,
+  ArrowRight,
+} from "lucide-react";
 import { products } from "@/lib/products";
 import { download } from "@/lib/download";
 import { ProductCard, ProductIcon, SetupNotice } from "@/components/site";
@@ -52,6 +59,17 @@ export default async function Home() {
             <Smartphone size={16} /> Useful by design <span>·</span> Engineering
             Ideas Into Reality.
           </div>
+          <form action="/products" className="hero-search">
+            <Search size={18} />
+            <input
+              aria-label="Find an app"
+              name="q"
+              placeholder="What would you like to make simpler?"
+            />
+            <button aria-label="Find apps">
+              <ArrowRight size={18} />
+            </button>
+          </form>
         </Reveal>
         {lead ? (
           <Link className="hero-product" href={`/products/${lead.slug}`}>
@@ -113,7 +131,9 @@ export default async function Home() {
           <Link href="/products">See all apps ↗</Link>
         </div>
         {featured.length ? (
-          <div className="collection-rail">
+          <div
+            className={`collection-rail ${featured.length === 1 ? "single-feature" : ""}`}
+          >
             {featured.map((p) => (
               <ProductCard
                 key={p.slug}
@@ -121,6 +141,35 @@ export default async function Home() {
                 downloadUrl={downloads.get(p.slug)?.url}
               />
             ))}
+            {featured.length === 1 && (
+              <div className="feature-context">
+                <span className="eyebrow">A TOOL WITH A PURPOSE</span>
+                <h3>
+                  Less friction.
+                  <br />
+                  More everyday possibility.
+                </h3>
+                <p>{featured[0].tagline || featured[0].description}</p>
+                <div className="feature-specs">
+                  <span>
+                    <Smartphone size={16} />
+                    {featured[0].platform}
+                  </span>
+                  <span>
+                    <Download size={16} />
+                    {featured[0].pricing}
+                  </span>
+                  <span>
+                    <Layers3 size={16} />
+                    {featured[0].category}
+                  </span>
+                </div>
+                <Link href={`/products/${featured[0].slug}`}>
+                  Get to know {featured[0].name.split("—")[0].trim()}{" "}
+                  <ArrowUpRight size={16} />
+                </Link>
+              </div>
+            )}
           </div>
         ) : (
           <div className="empty-state">
@@ -143,7 +192,10 @@ export default async function Home() {
               <Layers3 />
               <strong>{c}</strong>
               <span>
-                {items.filter((p) => p.category === c).length} apps{" "}
+                {items.filter((p) => p.category === c).length}{" "}
+                {items.filter((p) => p.category === c).length === 1
+                  ? "app"
+                  : "apps"}{" "}
                 <ArrowUpRight size={16} />
               </span>
             </Link>

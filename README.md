@@ -1,4 +1,4 @@
-# Radman Labs 2.0 2.0
+# Radman Labs 2.0
 
 Next.js App Router, TypeScript, Tailwind CSS, shadcn-style accessible Button, Motion, Lucide, Supabase Auth/Postgres/Storage, and Vercel. Actual source code; no passwords, service-role keys, fake APKs, or fabricated screenshots.
 
@@ -6,9 +6,9 @@ Next.js App Router, TypeScript, Tailwind CSS, shadcn-style accessible Button, Mo
 
 Read [UPGRADE-2.0.md](UPGRADE-2.0.md) before deploying. Apply only migration 004 to an already bootstrapped database. [AUTH-DIAGNOSTICS.md](AUTH-DIAGNOSTICS.md) records the login investigation, code corrections and remaining production checks.
 
-## Upgrade the existing site
+## Marketplace refinements
 
-Read [UPGRADE-2.0.md](UPGRADE-2.0.md) before deploying to the existing Vercel/Supabase projects. Apply only migration 004 to an already initialized database. Authentication findings and the secure recovery checklist are in [AUTH-DIAGNOSTICS.md](AUTH-DIAGNOSTICS.md).
+The November 26 refinement adds homepage app search, keyboard search shortcuts (/ and Ctrl/Cmd+K), removable filter chips, grid/list catalog layouts, gallery thumbnails, responsive featured-product context, and request-scoped product queries. No additional database migration is required beyond the documented 2.0 migration.
 
 ## Run locally
 
